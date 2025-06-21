@@ -1,88 +1,103 @@
+# ─────────────────────────────────────────────────────────────
+# run_models.py – fetch LLM responses for test10_prompts.csv
+# ─────────────────────────────────────────────────────────────
 import os
 import csv
 import json
+import pathlib
+from collections import OrderedDict
 from dotenv import load_dotenv
 from openai import OpenAI
 
-# ─────────────────────────────────────────────────────────────
-# Config
-# ─────────────────────────────────────────────────────────────
-CSV_IN   = "data/10_prompts.csv"   # <- change to your actual file
-JSON_OUT = "data/full_output.json"
+# 1. Config paths ─────────────────────────────────────────────
+CSV_IN   = "data/test10_prompts.csv"
+JSON_OUT = "data/outputs.json"
 
-# Extra columns to add (blank / None until later stages)
+# 2. Desired JSON field order ─────────────────────────────────
+OUTPUT_ORDER = [
+    "prompt_id", "category", "prompt", "model", "response",
+    "factual_accuracy", "completeness", "support_verifiability",
+    "reasoning", "tone_hedging", "hallucination", "label_notes",
+    "reference_text", "bert_f1", "cos_sim", "token_len",
+    "entity_count", "question_type", "ambiguity_flag"
+]
+
+# 3. Default values for all eval fields ──────────────────────
 EXTRA_COLS = {
-    "reference_text": "",
-    "bert_f1": None,
-    "cos_sim": None,
-    "token_len": None,
+    # your six manual‐check columns come prefilled:
+    "factual_accuracy":      1,
+    "completeness":          1,
+    "support_verifiability": 1,
+    "reasoning":             1,
+    "tone_hedging":          1,
+    "hallucination":         0,
+    "label_notes":           "",
+
+    # the rest remain blank/null
+    "bert_f1":      None,
+    "cos_sim":      None,
+    "token_len":    None,
     "entity_count": None,
-    "question_type": "",
-    "ambiguity_flag": None,
-    "factual_accuracy": None,
-    "completeness": None,
-    "support_verifiability": None,
-    "reasoning": None,
-    "tone_hedging": None,
-    "hallucination": None,
-    "label_notes": ""
+    "question_type":"",
+    "ambiguity_flag":None
 }
 
-# ─────────────────────────────────────────────────────────────
-# Setup OpenAI client
-# ─────────────────────────────────────────────────────────────
-load_dotenv()             # expects OPENAI_API_KEY in .env
+# 4. Models to test ───────────────────────────────────────────
+MODELS = ["gpt-3.5-turbo", "gpt-4o"]
+
+# 5. OpenAI client ────────────────────────────────────────────
+load_dotenv()  # expects OPENAI_API_KEY in .env
 client = OpenAI()
 
-# ─────────────────────────────────────────────────────────────
-# Helper functions
-# ─────────────────────────────────────────────────────────────
-def load_prompts(path):
-    """Return list of dicts from a CSV file."""
+# 6. Helpers ──────────────────────────────────────────────────
+def load_prompts(path: str):
     if not os.path.isfile(path):
-        raise FileNotFoundError(f"CSV file not found: {path}")
-    with open(path, newline='', encoding="utf-8") as f:
+        raise FileNotFoundError(f"CSV not found: {path}")
+    with open(path, newline="", encoding="utf-8") as f:
         return list(csv.DictReader(f))
 
-def call_model(prompt, model_name):
-    """Query OpenAI chat model (temperature 0) and return string."""
+def call_model(prompt_text: str, model_name: str) -> str:
     resp = client.chat.completions.create(
-        model=model_name,
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0,
-        max_tokens=300
+        model       = model_name,
+        messages    = [{"role": "user", "content": prompt_text}],
+        temperature = 0,
+        max_tokens  = 300
     )
     return resp.choices[0].message.content.strip()
 
-# ─────────────────────────────────────────────────────────────
-# Main routine
-# ─────────────────────────────────────────────────────────────
+# 7. Main ─────────────────────────────────────────────────────
 def main():
     prompts = load_prompts(CSV_IN)
     results = []
 
     for row in prompts:
-        for model in ["gpt-3.5-turbo", "gpt-4o"]:
-            output = call_model(row["prompt"], model)
+        prompt_text   = row["prompt"]
+        reference_txt = row.get("reference_text", "")
 
-            # Start with existing CSV columns
+        for model_name in MODELS:
+            output = call_model(prompt_text, model_name)
+
+            # build record with reference_text + prefilled evals
             record = {
-                "prompt_id": row.get("prompt_id", ""),
-                "category":  row.get("category", ""),
-                "prompt":    row.get("prompt", ""),
-                "model":     model,
-                "response":  output,
+                "prompt_id":      row.get("prompt_id",""),
+                "category":       row.get("category",""),
+                "prompt":         prompt_text,
+                "model":          model_name,
+                "response":       output,
+                "reference_text": reference_txt
             }
+            record.update(EXTRA_COLS)
 
-            # Add any extra columns not present yet
-            for col, default in EXTRA_COLS.items():
-                record.setdefault(col, default)
+            # reorder to your schema
+            ordered = OrderedDict((k, record[k]) for k in OUTPUT_ORDER)
+            results.append(ordered)
+            print(f"{record['prompt_id']} – {model_name}: done")
 
-            results.append(record)
-
-    os.makedirs(os.path.dirname(JSON_OUT), exist_ok=True)
+    pathlib.Path(JSON_OUT).parent.mkdir(parents=True, exist_ok=True)
     with open(JSON_OUT, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
+
+    print(f"\n✓ Saved {len(results)} records to {JSON_OUT}")
 
 if __name__ == "__main__":
     main()

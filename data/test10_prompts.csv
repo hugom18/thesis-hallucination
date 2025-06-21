@@ -1,0 +1,3 @@
+prompt_id,category,prompt,model,response,factual_accuracy,completeness,support_verifiability,reasoning,tone_hedging,hallucination,label_notes,reference_text,bert_f1,token_len,entity_count,question_type,ambiguity_flag,cos_sim
+A1,A,What is the capital of Finland?,,,,,,,,,,The capital of Finland is Helsinki.,,,,,,
+A2,A,In which year did the Apollo 11 mission land on the Moon?,,,,,,,,,,The Apollo 11 mission landed on the Moon in 1969.,,,,,,
