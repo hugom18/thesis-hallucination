@@ -18,9 +18,11 @@ OUTPUT_ORDER = [
     "prompt_id", "category", "prompt", "model", "response",
     "factual_accuracy", "completeness", "support_verifiability",
     "reasoning", "tone_hedging", "hallucination", "label_notes",
-    "reference_text", "bert_f1", "cos_sim", "token_len",
-    "entity_count", "question_type", "ambiguity_flag"
+    "reference_text", "bert_f1", "cos_sim", "token_len", "char_len",
+    "entity_count", "question_type", "ambiguity_flag",
+    "pronoun_ratio", "imperative_flag", "readability_score", "punct_density"
 ]
+
 
 # 3. Default values for all eval fields ──────────────────────
 EXTRA_COLS = {
@@ -34,12 +36,17 @@ EXTRA_COLS = {
     "label_notes":           "",
 
     # the rest remain blank/null
-    "bert_f1":      None,
-    "cos_sim":      None,
-    "token_len":    None,
-    "entity_count": None,
-    "question_type":"",
-    "ambiguity_flag":None
+    "bert_f1":               None,
+    "cos_sim":               None,
+    "token_len":             None,
+    "char_len":              None,
+    "entity_count":          None,
+    "question_type":         "",
+    "ambiguity_flag":        None,
+    "pronoun_ratio":         None,
+    "imperative_flag":       None,
+    "readability_score":     None,
+    "punct_density":         None
 }
 
 # 4. Models to test ───────────────────────────────────────────
