@@ -1,0 +1,3 @@
+Hallucination,bert_f1_mean,bert_f1_std,bert_f1_count,cos_sim_mean,cos_sim_std,cos_sim_count
+0,0.893,0.05,101,0.789,0.15,101
+1,0.879,0.04,19,0.691,0.132,19

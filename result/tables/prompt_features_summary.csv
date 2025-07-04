@@ -1,0 +1,8 @@
+Feature,Mean,SD,N
+token_len,12.225,4.626,120.0
+char_len,57.475,19.805,120.0
+entity_count,1.333,0.853,120.0
+pronoun_ratio,0.057,0.069,120.0
+imperative_flag,0.4,0.492,120.0
+readability_score,59.442,24.539,120.0
+punct_density,0.024,0.012,120.0

@@ -1,7 +1,6 @@
-# src/predictive_modeling.py
-
 import pandas as pd
 import numpy as np
+import os
 from sklearn.model_selection import StratifiedKFold
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
@@ -9,21 +8,34 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, f1_score
 from sklearn.preprocessing import OneHotEncoder
 
-# 1) Load feature matrix
-df = pd.read_csv("data/feature_matrix.csv")
+# 1) Load feature matrix from final folder
+feature_matrix_path = "data/final/feature_matrix.csv"
+df = pd.read_csv(feature_matrix_path)
 
 # 2) Preprocess
-df["ambiguity_flag"] = df["ambiguity_flag"].fillna(0)
-X_num = df[["bert_f1", "cos_sim", "nli_contradiction", "token_len", "entity_count"]]
+# Fill ambiguity_flag and ensure integer type
+df["ambiguity_flag"] = df["ambiguity_flag"].fillna(0).astype(int)
 
-# One-hot encode question_type
+# Numeric features: include all available numeric prompt-level features
+numeric_features = [
+    "bert_f1", "cos_sim", "nli_contradiction",
+    "token_len", "char_len", "entity_count",
+    "pronoun_ratio", "imperative_flag",
+    "readability_score", "punct_density"
+]
+X_num = df[numeric_features]
+
+# One-hot encode question_type and ambiguity_flag as categorical
 ohe = OneHotEncoder(sparse_output=False, handle_unknown="ignore")
-q_enc = ohe.fit_transform(df[["question_type"]].fillna("none"))
-q_cols = [name.replace("question_type", "qtype") for name in ohe.get_feature_names_out()]
-X_q = pd.DataFrame(q_enc, columns=q_cols, index=df.index)
+cat_features = ["question_type"]
+X_cat = pd.DataFrame(
+    ohe.fit_transform(df[cat_features].fillna("none")),
+    columns=[f"{col}_{val}" for col in cat_features for val in ohe.categories_[0]],
+    index=df.index
+)
 
 # Combine features & labels
-X = pd.concat([X_num, X_q], axis=1)
+X = pd.concat([X_num, X_cat], axis=1)
 y = df["hallucination"].astype(int)
 
 # 3) Define classifiers
@@ -44,7 +56,7 @@ for train_idx, test_idx in skf.split(X, y):
         clf.fit(X_train, y_train)
         preds = clf.predict(X_test)
         results[name]["accuracy"].append(accuracy_score(y_test, preds))
-        results[name]["f1"].append(f1_score(y_test, preds))
+        results[name]["f1"].append(f1_score(y_test, preds, average='macro'))
 
 # 5) Summarize and print
 summary = []
@@ -58,3 +70,8 @@ df_summary = pd.DataFrame(summary)
 
 print("\nCross-Validated Model Performance:")
 print(df_summary.to_string(index=False))
+
+# Optional: save summary
+os.makedirs("result/tables", exist_ok=True)
+df_summary.to_csv("result/tables/model_performance.csv", index=False)
+print("Saved model performance summary to results/tables/model_performance.csv")

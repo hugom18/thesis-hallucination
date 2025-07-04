@@ -1,5 +1,3 @@
-# compute_factuality_signals.py
-
 import os
 import json
 from dotenv import load_dotenv
@@ -31,8 +29,8 @@ def compute_nli_contradiction(response: str, reference: str) -> float:
         probs = model(**inputs).logits.softmax(dim=-1)[0]
     return probs[2].item()  # index 2 = CONTRADICTION
 
-# Load enriched data
-with open("data/outputs_enriched.json", "r") as f:
+# Load enriched data from intermediate folder
+with open("data/intermediate/outputs_enriched.json", "r") as f:
     data = json.load(f)
 
 # Compute only NLI contradiction
@@ -41,8 +39,11 @@ for entry in data:
     ref  = entry["reference_text"]
     entry["nli_contradiction"] = compute_nli_contradiction(resp, ref)
 
-# Save expanded output
-with open("data/outputs_expanded.json", "w") as f:
+# Ensure intermediate folder exists
+os.makedirs("data/intermediate", exist_ok=True)
+
+# Save expanded output to intermediate folder
+with open("data/intermediate/outputs_expanded.json", "w") as f:
     json.dump(data, f, indent=2)
 
-print("✅ data/outputs_expanded.json created with nli_contradiction only.")
+print("data/intermediate/outputs_expanded.json created with nli_contradiction only.")
