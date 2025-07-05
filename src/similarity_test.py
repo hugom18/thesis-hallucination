@@ -43,7 +43,7 @@ for i, entry in enumerate(data):
     entry["entity_count"]  = len(doc.ents)
 
     # Question type
-    m = re.match(r"\s*(who|what|when|where|why|how)\b", prompt.lower())
+    m = re.match(r"\s*(who|what|when|which|why|how)\b", prompt.lower())
     entry["question_type"] = m.group(1) if m else None
 
     # Ambiguity flag: propagate existing label
