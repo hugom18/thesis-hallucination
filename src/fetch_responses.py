@@ -15,8 +15,8 @@ from anthropic import Anthropic, HUMAN_PROMPT, AI_PROMPT
 from cohere import Client as CohereClient
 
 # 1. Config paths ───────────────────────────────────────────── Config paths ─────────────────────────────────────────────
-CSV_IN   = "data/raw/10_prompts.csv"
-JSON_OUT = "data/intermediate/full_output.json"
+CSV_IN   = "data/raw/prompts.csv"
+JSON_OUT = "data/intermediate/outputs.json"
 
 # 2. Desired JSON field order ─────────────────────────────────
 OUTPUT_ORDER = [
