@@ -1,3 +1,7 @@
+#predictive_modeling.py
+# ─────────────────────────────────────────────────────────────
+# predictive_modeling.py – train and evaluate predictive models for hallucination detection
+# ─────────────────────────────────────────────────────────────
 import pandas as pd
 import numpy as np
 import os

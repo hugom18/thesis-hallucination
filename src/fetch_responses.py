@@ -1,5 +1,6 @@
+# fetch_responses.py
 # ─────────────────────────────────────────────────────────────
-# run_models.py – fetch LLM responses for test10_prompts.csv 
+# fetch_responses.py – fetch LLM responses for test10_prompts.csv 
 # ─────────────────────────────────────────────────────────────
 import os
 import csv

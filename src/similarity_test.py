@@ -1,3 +1,7 @@
+#similarity_test.py
+# ─────────────────────────────────────────────────────────────
+# similarity_test.py – compute similarity metrics for LLM responses
+# ─────────────────────────────────────────────────────────────
 import json
 import spacy
 import re

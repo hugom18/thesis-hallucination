@@ -1,3 +1,7 @@
+#compute_factuality_signals.py
+# ─────────────────────────────────────────────────────────────
+# compute_factuality_signals.py – compute NLI contradiction scores for LLM responses
+# ─────────────────────────────────────────────────────────────
 import os
 import json
 from dotenv import load_dotenv

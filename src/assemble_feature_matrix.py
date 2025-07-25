@@ -1,3 +1,7 @@
+# assemble_feature_matrix.py
+# ─────────────────────────────────────────────────────────────
+# assemble_feature_matrix.py – assemble the final feature matrix for predictive modeling
+# ─────────────────────────────────────────────────────────────
 import json
 import pandas as pd
 import os
